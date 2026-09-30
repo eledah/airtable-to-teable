@@ -86,3 +86,9 @@ Uploading relocates bytes (source file deleted as the volume grows), so the
 net cost of a base is its CSV data + DB bloat — not its attachment size.
 `--prune` deletes each file right after its upload verifies, keeping the
 transfer buffer bounded; uploads stream in ≤1 MiB chunks (bounded RAM).
+
+Two orchestrators cover both disk situations: `migrate` runs import → attach
+→ prune over an already-downloaded `backup/` (smallest-first, disk guards);
+`sync` streams download → import → attach → prune one base at a time, so peak
+disk stays ~one base instead of the whole estate. Both resume from their state
+file and only mark a base done after its source folder is gone.

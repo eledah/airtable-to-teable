@@ -5,18 +5,18 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import attachments, download, export_sqlite, import_data, migrate
+from . import attachments, download, export_sqlite, import_data, migrate, sync
 
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="airtable-teable",
-        description="Airtable -> Teable migration pipeline (download | import | attach | migrate | export)",
+        description="Airtable -> Teable migration pipeline (download | import | attach | migrate | sync | export)",
     )
     ap.add_argument("--version", action="store_true", help="print version and exit")
     ap.add_argument(
         "stage", nargs="?",
-        choices=["download", "import", "attach", "migrate", "export"],
+        choices=["download", "import", "attach", "migrate", "sync", "export"],
         help="pipeline stage; pass '<stage> --help' for stage options",
     )
     return ap
@@ -37,6 +37,7 @@ def main(argv=None) -> int:
         "import": import_data.main,
         "attach": attachments.main,
         "migrate": migrate.main,
+        "sync": sync.main,
         "export": export_sqlite.main,
     }
     if known.stage not in dispatch:

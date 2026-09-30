@@ -11,6 +11,8 @@ backup/
 *.sqlite-journal
 migration_state.json
 migration_run.log
+sync_state.json
+sync_run.log
 import_*.log
 att_*.log
 BACKUP_REPORT.*

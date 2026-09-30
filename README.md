@@ -12,7 +12,8 @@ Airtable API ──▶ download ──▶ backup/ (CSV + files + manifest.json)
                                     ──▶ import ──▶ Teable (tables, records, links, selects)
                                                 ──▶ attach ──▶ Teable attachment fields
                                                           ──▶ prune source (optional)
-migrate orchestrates all of the above, smallest-first, resumable.
+migrate orchestrates import → attach → prune for already-downloaded bases.
+sync streams download → import → attach → prune ONE base at a time (tight disks).
 export (optional) snapshots any Teable base back to SQLite.
 ```
 
@@ -43,6 +44,11 @@ PYTHONPATH=src python3 -m airtable_teable attach --out ./backup --bases "My Base
 # 5. Or run everything unattended, smallest-first, resumable:
 PYTHONPATH=src python3 -m airtable_teable migrate --out ./backup
 
+# 5b. Tight disk? Stream one base at a time (never hold the full estate):
+#     download → import → attach → prune per base, resumable via sync_state.json
+PYTHONPATH=src python3 -m airtable_teable sync --out ./backup
+PYTHONPATH=src python3 -m airtable_teable sync --out ./backup --bases "My Base,appXXX" --dry-run
+
 # 6. (Optional) snapshot a Teable base back to SQLite
 PYTHONPATH=src python3 -m airtable_teable export <teableBaseId> ./out.sqlite
 ```
@@ -58,6 +64,7 @@ Install once with `pip install -e .` and drop the `PYTHONPATH=src` prefix
 | 2. import | `airtable-teable import --out ./backup [--bases A,B] [--no-links]` | CSVs → Teable base (primary-name field, real links + multi-selects) | No — creates a new base each run; delete partials before retry |
 | 3. attach | `airtable-teable attach --out ./backup --bases A [--prune]` / `--all` | Files → Teable `attachment` fields (replaces placeholder text) | Yes (reuses fields, skips uploaded names) |
 | 4. migrate | `airtable-teable migrate --out ./backup` | Orchestrates 2→3→prune for every pending base, smallest-first | Yes (state file; only marks done after source pruned) |
+| 4b. sync | `airtable-teable sync --out ./backup [--bases Name,appID]` | Streams download→import→attach→prune ONE base at a time (peak disk ≈ one base) | Yes (`sync_state.json`; per-table/per-file resume; partial Teable base cleaned for retry) |
 | 5. export | `airtable-teable export <baseId> out.sqlite` | Teable → SQLite (text only) | N/A |
 
 ## Configuration
@@ -136,10 +143,10 @@ PYTHONPATH=src python3 -m airtable_teable migrate --out ./backup --dry-run
 ## Project layout
 
 ```
-src/airtable_teable/  download.py import_data.py attachments.py migrate.py
+src/airtable_teable/  download.py import_data.py attachments.py migrate.py sync.py
                       export_sqlite.py airtable.py teable.py config.py utils.py
                       cli.py (__main__.py)
-tests/                test_classify.py test_resume.py test_utils.py
+tests/                test_classify.py test_resume.py test_utils.py test_sync.py
 docs/                 MIGRATION_NOTES.md
 .env.example  pyproject.toml  requirements.txt  LICENSE
 ```
