@@ -1,0 +1,3 @@
+# No runtime dependencies — stdlib only (urllib, csv, json, sqlite3).
+# Dev/test only:
+pytest>=7

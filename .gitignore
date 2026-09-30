@@ -1,0 +1,33 @@
+# Secrets (never commit real tokens — but DO commit the template)
+.teable_token
+.env
+*.env
+*.env.*
+!.env.example
+
+# Pipeline working data
+backup/
+*.sqlite
+*.sqlite-journal
+migration_state.json
+migration_run.log
+import_*.log
+att_*.log
+BACKUP_REPORT.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*~
